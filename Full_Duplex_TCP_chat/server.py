@@ -12,10 +12,9 @@ sock.bind((host,port))
 sock.listen(1)
 conn,addr=sock.accept()
 print("**************connecting****************")
-print("________________________________________")
 client_name=conn.recv(1204).decode()
 conn.send(name.encode('ascii'))
-print("connected to {}".format(client_name))
+print("__________connected to {}_______________".format(client_name))
 def send():
     while(1):
         message=input()

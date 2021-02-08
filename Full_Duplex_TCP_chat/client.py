@@ -16,7 +16,7 @@ def send():
         message = input()
         conn.send(message.encode('ascii'))
         print()
-        
+
 
 thread=threading.Thread(target=send)
 thread.daemon=True
