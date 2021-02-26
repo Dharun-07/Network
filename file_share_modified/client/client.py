@@ -73,6 +73,6 @@ try:
         else:print("\n"+"    "+server_name+":"+mess)
 except KeyboardInterrupt:
     conn.close()
-    print("CONNECTION CLOSED_____________")
+    print("******************CONNECTION CLOSED*********************")
 
 
