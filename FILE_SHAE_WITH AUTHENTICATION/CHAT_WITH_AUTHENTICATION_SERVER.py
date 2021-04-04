@@ -2,7 +2,11 @@
 import socket
 import threading
 import os
+import random
+import string
+import ssl, smtplib
 
+#-------------INITIALISING CONNEcTION
 
 sock=socket.socket(socket.AF_INET , socket.SOCK_STREAM)
 name=input("ENTER YOUR NAME:")
@@ -18,6 +22,61 @@ print("**************connecting****************")
 client_name=conn.recv(1204).decode()
 conn.send(name.encode('ascii'))
 print("__________connected to {}_______________".format(client_name))
+
+
+#----------------GENERATING PASSW
+
+char=string.ascii_uppercase+string.digits+string.ascii_lowercase+string.printable
+passw=""
+for i in range(15):
+    passw+=random.choice(char)
+
+#--------------SENDING EMAIL
+
+def read_cred():
+    user = password = ''
+    with open("cred.txt", "r") as f:
+        file = f.readlines()
+        user = file[0].strip()
+        password = file[1].strip()
+
+    return user, password
+
+
+sender, password = read_cred()
+
+receiver = ""
+
+port = 465
+
+message =f"""\
+Subject: Welcome To Secure Chat This is your password
+
+{passw}
+
+Thank you
+"""
+
+context = ssl.create_default_context()
+
+print("-----------------Starting to send-----------------")
+
+with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as serv:
+    serv.login(sender, password)
+    serv.sendmail(sender, receiver, message)
+
+print("------------------Email Sent----------------------")
+
+
+user_passw=conn.recv(1024).decode('ascii')
+
+if(user_passw!=passw):
+    conn.send(b"_________________YOU HAVE ENTERED THE WRONG PASSWORD.SESSION IS TERMINATING_________________")
+    conn.close()
+    sock.close()
+    quit()
+else:
+    print("CONNECTED---------------------------->")
 def send():
     while(1):
         message=input()
@@ -32,6 +91,9 @@ def send():
         else:
             conn.send(message.encode('ascii'))
             print()
+
+
+#--------------------STARTED
 
 def file_send():
     f_name=input("***ENTER THE NAME OF THE FILE")

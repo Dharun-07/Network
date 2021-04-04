@@ -1,8 +1,16 @@
+#!/usr/bin/env python3
+
 import socket
 import threading
 import os
 from tqdm import tqdm
+import rsa
 
+
+
+
+
+#--------------INITIALISING CONNECTION
 conn=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 h_name=input("ENTER YOUR NAME:")
 port=10000
@@ -12,8 +20,32 @@ print("________________________________________")
 conn.connect((host,port))
 conn.send(h_name.encode('ascii'))
 server_name=conn.recv(1024).decode('ascii')
-print("********************connected**********************")
-print("***YOU CAN START TYPING YOUR MESSAGE.FOR FILE SHARING ENTER <FILE_SHARE> TO ENABLE FILESHARE***")
+
+
+#--------------------Generating RSA
+publickey,privatekey=rsa.newkeys(2048)
+
+#--------------------AUTHENTICATION
+
+user_passw=input("ENTER THE PASSWORD SENT TO YOUR MAIL : ")
+conn.send(user_passw.encode('ascii'))
+auth=conn.recv(1024)
+if(auth==b"__________________________________________YOU HAVE ENTERED THE WRONG PASSWORD.SESSION IS TERMINATING_________________________________"):
+    print(auth.decode('ascii'))
+    conn.close()
+    quit()
+else:  #---------------------secure chat
+    print("********************connected**********************")
+    print("***YOU CAN START TYPING YOUR MESSAGE.FOR FILE SHARING ENTER <FILE_SHARE> TO ENABLE FILESHARE OR ENTER <quit> to QUIT***")
+
+#----------------recieving RSA
+print("RECIEVING")
+server_public_key=conn.recv(4096)
+server_public_key=rsa.key.PublicKey.load_pkcs1(server_public_key, format='DER')
+print("KEY RECIEVED")
+
+
+
 def send():
     while (1):
         message = input()
@@ -25,7 +57,9 @@ def send():
             thread.daemon = True
             thread.start()
         else:
-            conn.send(message.encode('ascii'))
+            message=message.encode('ascii')
+            message=rsa.encrypt(message,server_public_key)
+            conn.send(message)
             print()
 
 def file_send():
@@ -47,6 +81,7 @@ def file_send():
             progress.update(len(content))
 
 
+#-----------------thread
 
 thread=threading.Thread(target=send)
 thread.daemon=True
@@ -74,5 +109,3 @@ try:
 except KeyboardInterrupt:
     conn.close()
     print("******************CONNECTION CLOSED*********************")
-
-
