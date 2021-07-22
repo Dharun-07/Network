@@ -1,0 +1,5 @@
+sockets==1.0.0 PyAudio==0.2.11
+pyfiglet==0.8.post0
+ssl
+rsa
+termcolor
